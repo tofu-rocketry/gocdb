@@ -71,6 +71,11 @@ class User {
     /** @Column(type="datetime", nullable=true)  */
     protected $lastLoginDate;
 
+    /**
+     * Bidirectional - A User can have many APIAuthenication Entities.
+     * @OneToMany(targetEntity="APIAuthentication", mappedBy="user")
+     */
+    protected $APIAuthenticationEntities = null;
     /*
      * TODO:
      * This entity will need to own a property bag (akin to custom props)
@@ -87,6 +92,7 @@ class User {
         $this->creationDate = new \DateTime("now");
         //$this->sites = new ArrayCollection();
         $this->roles = new ArrayCollection();
+        $this->APIAuthenticationEntities = new ArrayCollection();
     }
 
     /**
@@ -334,5 +340,22 @@ class User {
     public function getRoles() {
         return $this->roles;
     }
-
+    /**
+     * Keep track of the authentication entities associated with this user,
+     * including updating the entity itself as the owning side of the
+     * relation.
+     * @param \APIAuthentication $authenticationEntity
+     */
+    public function addAPIAuthenticationEntitiesDoJoin (\APIAuthentication $authenticationEntity) {
+        $this->APIAuthenticationEntities->add($authenticationEntity);
+        //$this->APIAuthenticationEntities[] = $authenticationEntity;
+        $authenticationEntity->_setUser($this);
+    }
+    /**
+     * Get the user's API credentials
+     * @return ArrayCollection
+     */
+    public function getAPIAuthenticationEntities () {
+        return $this->APIAuthenticationEntities;
+    }
 }

@@ -12,7 +12,9 @@
  * limitations under the License.
  */
 
- /**
+use Doctrine\DBAL\Types\BooleanType;
+
+/**
   * The APIAuthenticationEntity defines a credential that can be used to makce
   * changes throught he API for a specific {@see Site}. Each site can have
   * 0-many APIAuthentication entities associated with it. Each entity has an ID,
@@ -46,6 +48,39 @@
     protected $identifier = null;
 
     /**
+     * The registered User that added this APIAuthentication entity
+     * One user may have zero or more APIAuthentication entities.
+     * If renewed, this will be the user that renewed it.
+     *
+     * @ManyToOne(targetEntity="User", inversedBy="APIAuthenticationEntities")
+     * @JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
+     */
+    protected $user = null;
+
+     /**
+      * When this APIAuthentication entity was first used/registered.
+      * If renewed, this will be the time of renewal.
+      * @Column(type="datetime", nullable=false)
+      */
+    protected $createTime = null;
+
+    /**
+     * When this APIAuthentication entity was most recently used.
+     * @Column(type="datetime", nullable=true)
+     */
+    protected $lastUsedTime = null;
+
+    /**
+     * @Column(type="boolean", nullable=false)
+     */
+    protected $allowAPIWrite = true;
+
+    /**  */
+    public function __construct() {
+        //TODO-irn: Verify this is the correct time value to store in the db.
+        $this->createTime = new DateTime("now");
+    }
+    /**
      * Get PK of Authentication entity
      * @return int
      */
@@ -78,6 +113,34 @@
     }
 
     /**
+     * @return \User
+     */
+    public function getUser() {
+        return $this->user;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getFirstUsedTime () {
+        return $this->firstUsedTime;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getLastUsedTime () {
+        return $this->lastUsedTime;
+    }
+
+    /**
+     * @return bool $allowAPIWrite
+     */
+    public function getAllowAPIWrite () {
+        return $this->allowAPIWrite;
+    }
+
+    /**
      * Set the type of this authentication entity
      * @param string $name
      */
@@ -94,6 +157,30 @@
     }
 
     /**
+     * Called to update the creation time field when _setUser is invoked.
+     * @return \DateTime $time
+     */
+    protected function getCreateTime(\DateTime $time) {
+        return $this->createTime;
+    }
+
+    /**
+     * @param \DateTime $time
+     */
+    public function setLastUsedTime (\DateTime $time) {
+        $this->lastUsedTime = $time;
+    }
+    /**
+     * @param bool $allowAPIWrite
+     */
+    public function setAllowAPIWrite ($allowWrite) {
+        if (!is_bool($allowWrite)) {
+            throw new LogicException("Expected bool, received".gettype($allowWrite));
+        }
+        $this->allowAPIWrite = $allowWrite;
+    }
+
+    /**
      * Do not call in client code, always use the opposite
      * <code>$site->addAuthenticationEntityDoJoin($authenticationEntity)</code>
      * instead which internally calls this method to keep the bidirectional
@@ -104,7 +191,13 @@
      *
      * @param \Site $site
      */
-    public function _setParentSite($site){
+    public function _setParentSite(\Site $site){
         $this->parentSite = $site;
+    }
+    /**
+    * @param \User $user
+    */
+    public function _setUser(\User $user) {
+        $this->user = $user;
     }
   }

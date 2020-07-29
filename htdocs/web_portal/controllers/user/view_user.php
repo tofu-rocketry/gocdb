@@ -20,6 +20,7 @@
  *
  /*====================================================== */
 function view_user() {
+    require_once __DIR__.'/../../../../lib/Gocdb_Services/User.php';
     require_once __DIR__.'/../../../../lib/Gocdb_Services/Factory.php';
     require_once __DIR__.'/../../components/Get_User_Principle.php';
 
@@ -120,6 +121,7 @@ function view_user() {
     $params['projectNamesIds'] = $projectNamesIds;
     $params['role_ProjIds'] = $role_ProjIds;
     $params['portalIsReadOnly'] = \Factory::getConfigService()->IsPortalReadOnly();
+    $params['APIAuthEnts'] = $user->getAPIAuthenticationEntities();
     $title = $user->getFullName();
     show_view("user/view_user.php", $params, $title);
 }

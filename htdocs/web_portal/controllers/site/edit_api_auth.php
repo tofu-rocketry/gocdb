@@ -60,7 +60,15 @@ function draw(\User $user = null, \APIAuthentication $authEnt = null, \Site $sit
     $params['site'] = $site;
     $params['authEnt'] = $authEnt;
     $params['authTypes'] = array();
-    $params['authTypes'][]='X509';
+    $params['authTypes'][] = 'X509';
+    $params['user'] = $user;
+    $params['allowWrite'] = $authEnt->getAllowAPIWrite();
+    // If the user is changing, send in the new user DN
+    if ($user->getId() != $authEnt->getUser()->getId()) {
+        // TODO-irn: Check here if the authEnt DN is the same as the originating
+        // user DN and deny change to the DN if it is ???
+        $params['currentUserIdent'] = $authEnt->getUser()->getCertificateDn();
+    }
 
     show_view("site/edit_api_auth.php", $params);
     die();

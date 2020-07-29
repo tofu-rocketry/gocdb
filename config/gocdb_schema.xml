@@ -585,5 +585,9 @@
             <length>255</length>
             <regex>/^X509$/</regex>
         </field>
+		<field>
+			<fname>ALLOW_WRITE</fname>
+			<ftype>boolean</ftype>
+		</field>
     </entity>
 </schema>

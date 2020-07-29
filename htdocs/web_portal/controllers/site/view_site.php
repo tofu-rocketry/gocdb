@@ -55,8 +55,9 @@ function view_site() {
     $title = $site->getShortName();
     $params['site'] = $site;
     $params['roles'] = $roles;
+    //$params['userId'] = $user->getId(); // See controller comments for use
 
-    $params['APIAuthenticationEntities'] = $site->getAPIAuthenticationEntities();
+    $params['APIAuthEnts'] = $site->getAPIAuthenticationEntities();
 
     // Add RoleActionRecords to params
     $params['RoleActionRecords'] = \Factory::getRoleService()->getRoleActionRecordsById_Type($site->getId(), 'site');

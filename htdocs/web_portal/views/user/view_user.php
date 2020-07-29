@@ -293,7 +293,46 @@
             ?>
         </table>
     </div>
-
+    <?php if (!$params['APIAuthEnts']->isEmpty()) { ?>
+        <!-- API credentials -->
+        <div class="listContainer" style="width: 99.5%; float: left; margin-top: 3em; margin-right: 10px;">
+            <span class="header" style="vertical-align:middle; float: left; padding-top: 0.9em; padding-left: 1em;">
+                Owned API Credentials (Add and remove credentials by clicking the relevant Site.)
+            </span>
+            <img src="<?php echo \GocContextPath::getPath()?>img/key.png" class="decoration" />
+            <table style="clear: both; width: 100%;">
+                <tr class="site_table_row_1">
+                    <th class="site_table">Type</th>
+                    <th class="site_table">Identifier</th>
+                    <th class="site_table">Site</th>
+                    <th class="site_table">API Write</th>
+                </tr>
+                <?php
+                    foreach ($params['APIAuthEnts'] as $APIAuthEnt) { ?>
+                        <tr>
+                            <td class="site_table"><?php xecho($APIAuthEnt->getType());?></td>
+                            <td class="site_table"><?php xecho($APIAuthEnt->getIdentifier());?></td>
+                            <td class="site_table">
+                                <a href="index.php?Page_Type=Site&amp;id=<?php xecho($APIAuthEnt->getParentSite()->getId())?>"
+                                    title="<?php xecho($APIAuthEnt->getParentSite()->getShortName())?>">
+                                    <?php xecho(substr($APIAuthEnt->getParentSite()->getShortName(),0,16));?>
+                                </a>
+                            </td>
+                            <td class="site_table" style="width: 8%; text-align:center">
+                                <img height="22px" src=
+                                    <?php if (($APIAuthEnt->getAllowAPIWrite())) {
+                                        echo '"'.\GocContextPath::getPath().'img/tick.png"';
+                                    } else {
+                                        echo '"'.\GocContextPath::getPath().'img/cross.png"';
+                                    } ?>
+                                />
+                            </td>
+                        </tr>
+                <?php
+                    } ?>
+            </table>
+        </div>
+    <?php } ?>
 </div>
 
  <script type="text/javascript">

@@ -7,6 +7,11 @@ before_script: .travis/setup
 script: .travis/run_tests.sh
 services:
     - mysql
+
+#branches:
+#  except:
+#  - dn-registration
+
 php:
     - '5.4'
     - '5.5'

@@ -67,11 +67,6 @@ foreach($usersRoles as $user) {
         $doctrineUser->setHomeSiteDoJoin($homeSite);
     }
 
-    //Make Dave an admin
-    if ($doctrineUser->getCertificateDn()=="/C=UK/O=eScience/OU=CLRC/L=DL/CN=david meredith"){
-        $doctrineUser->setAdmin(true);
-    }
-
     $entityManager->persist($doctrineUser);
 
 }

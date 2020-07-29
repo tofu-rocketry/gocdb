@@ -11,6 +11,14 @@ require_once dirname(__FILE__). '/../../lib/Gocdb_Services/Role.php';
  */
 class TestUtil {
 
+    // A helper function for several of the helper functions:
+    // Create a new object of the given name and call the 'setName' method.
+    private static function createAndName($className, $name) {
+        $instance = new $className();
+        $instance->setName($name);
+        return $instance;
+    }
+
     public static function createRoleActionRecord(){
          /*$rar = new RoleActionRecord($updatedByUserId, $updatedByUserPrinciple,
                 $roleId, $rolePreStatus, $roleNewStatus, $roleTypeId,
@@ -136,12 +144,20 @@ class TestUtil {
     }
 
     public static function createSampleScope($description, $name){
-        $scope = new Scope();
+        $scope = self::createAndName('Scope', $name);
         $scope->setDescription($description);
-        $scope->setName($name);
         return $scope;
     }
-
+    public static function createSampleInfrastructure($name){
+        return self::createAndName('Infrastructure', $name);
+    }
+    public static function createSampleCertStatus($name){
+        return self::createAndName('certificationStatus',$name);
+    }
+    public static function createSampleCountry($name){
+        $country = self::createAndName('country',$name);
+        $country->setCode('UTP');
+        return $country;
+    }
 }
-
 ?>

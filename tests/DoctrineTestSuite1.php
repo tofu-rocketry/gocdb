@@ -18,6 +18,8 @@ require_once __DIR__ . '/doctrine/DowntimeServiceEndpointTest1.php';
 require_once __DIR__ . '/unit/lib/Gocdb_Services/RoleActionAuthorisationServiceTest.php';
 require_once __DIR__ . '/unit/lib/Gocdb_Services/RoleActionMappingServiceTest.php';
 require_once __DIR__ . '/unit/lib/Gocdb_Services/ScopeServiceTest.php';
+require_once __DIR__ . '/unit/lib/Gocdb_Services/UserServiceTest.php';
+require_once __DIR__ . '/unit/lib/Gocdb_Services/SiteServiceTest.php';
 require_once __DIR__ . '/writeAPI/siteMethods.php';
 require_once __DIR__ . '/writeAPI/serviceMethods.php';
 require_once __DIR__ . '/writeAPI/endpointMethods.php';
@@ -49,6 +51,8 @@ class DoctrineTestSuite1 {
     $suite->addTestSuite('RoleActionAuthorisationServiceTest');
     $suite->addTestSuite('RoleActionMappingServiceTest');
     $suite->addTestSuite('ScopeServiceTest');
+    $suite->addTestSuite('UserServiceTest');
+    $suite->addTestSuite('SiteServiceTest');
     $suite->addTestSuite('WriteAPIsiteMethodsTests');
     $suite->addTestSuite('WriteAPIserviceMethodsTests');
     $suite->addTestSuite('WriteAPIendpointMethodsTests');
