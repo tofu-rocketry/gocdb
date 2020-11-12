@@ -45,58 +45,51 @@ function view_user() {
     $callingUser = \Factory::getUserService()->getUserByPrinciple(Get_User_Principle());
 
     // can the calling user revoke the targetUser's roles?
-    /* @var $r \Role */
-    foreach ($roles as $r) {
-    //echo $r->getId().', '.$r->getRoleType()->getName().', '.$r->getOwnedEntity()->getName().'<br>';
+    /** @var \Role $r */
 
-    // determine if callingUser can REVOKE this role instance
-    if($user != $callingUser){
-        //echo '<br>'.$r->getOwnedEntity()->getName().' ';
+    foreach ($roles as $r) {
+
+        $decoratorString = '';
+        // determine if callingUser can REVOKE this role instance
+        if ($user != $callingUser) {
 
             $authorisingRoles = \Factory::getRoleActionAuthorisationService()
-            ->authoriseAction(\Action::REVOKE_ROLE, $r->getOwnedEntity(), $callingUser)
-            ->getGrantingRoles();
-            $authorisingRoleNames = array();
-        //echo ' callingUser authorising Roles: ';
-            /* @var $authRole \Role */
-            foreach($authorisingRoles as $authRole){
-               $authorisingRoleNames[] = $authRole->getRoleType()->getName();
-           //echo $authRole->getRoleType()->getName().', ';
-            }
+                ->authoriseAction(\Action::REVOKE_ROLE, $r->getOwnedEntity(), $callingUser)
+                ->getGrantingRoles();
 
-            if(count($authorisingRoleNames)>=1){
-                $allAuthorisingRoleNames = '';
-                foreach($authorisingRoleNames as $arName){
-                    $allAuthorisingRoleNames .= $arName.', ';
-                }
-                $allAuthorisingRoleNames = substr($allAuthorisingRoleNames, 0, strlen($allAuthorisingRoleNames)-2);
-                $r->setDecoratorObject('['.$allAuthorisingRoleNames.'] ');
-            }
-            if($callingUser->isAdmin()){
-                $existingVal = $r->getDecoratorObject();
-                if($existingVal != null){
-                   $r->setDecoratorObject('GOCDB ADMIN: '.$existingVal);
-                } else {
-                    $r->setDecoratorObject('GOCDB ADMIN');
+            if ($callingUser->isAdmin()) {
+                $decoratorString .= 'GOCDB_ADMIN';
+                if (count($authorisingRoles) >= 1) {
+                    $decoratorString .= ': ' ;
                 }
             }
-    } else {
-        // current user is viewing their own roles, so they can revoke their own roles
-        $r->setDecoratorObject('[Self revoke own role]');
-    }
+            if (count($authorisingRoles) >= 1) {
+                /** @var \Role $authRole */
+                $roleNames = array();
+                foreach ($authorisingRoles as $authRole) {
+                    $roleNames[] = $authRole->getRoleType()->getName();
+                }
+                $decoratorString .= '[' . implode(', ', $roleNames) . '] ';
+            }
+        } else {
+            // current user is viewing their own roles, so they can revoke their own roles
+            $decoratorString = '[Self revoke own role]';
+        }
+        if (strlen($decoratorString) > 0) {
+            $r->setDecoratorObject($decoratorString);
+        }
 
-    // Get the names of the parent project(s) for this role so we can
-    // group by project in the view
-    $parentProjectsForRole = \Factory::getRoleActionAuthorisationService()
-        ->getReachableProjectsFromOwnedEntity($r->getOwnedEntity());
-    $projIds = array();
-    foreach($parentProjectsForRole as $_proj){
-        $projIds[] = $_proj->getId();
-    }
+        // Get the names of the parent project(s) for this role so we can
+        // group by project in the view
+        $parentProjectsForRole = \Factory::getRoleActionAuthorisationService()
+            ->getReachableProjectsFromOwnedEntity($r->getOwnedEntity());
+        $projIds = array();
+        foreach ($parentProjectsForRole as $_proj) {
+            $projIds[] = $_proj->getId();
+        }
 
-    // store role and parent projIds in a 2D array for viewing
-    $role_ProjIds[] = array($r, $projIds);
-
+        // store role and parent projIds in a 2D array for viewing
+        $role_ProjIds[] = array($r, $projIds);
     }// end iterating roles
 
     // Get a list of the projects and their Ids for grouping roles by proj in view
