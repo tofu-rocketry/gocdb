@@ -145,6 +145,7 @@
                 <th class="site_table">Held Over</th>
                 <?php if(!$params['portalIsReadOnly']):?>
                     <th class="site_table">Revoke Role</th>
+                    <th class="site_table"/>
                 <?php endif; ?>
             </tr>
             <?php
@@ -195,9 +196,14 @@
                     <?php if(!$params['portalIsReadOnly'] && $role->getDecoratorObject() != null):?>
                         <form action="index.php?Page_Type=Revoke_Role" method="post">
                             <input type="hidden" name="id" value="<?php echo $role->getId()?>" />
-                            <input id="revokeButton" type="submit" value="Revoke" class="btn btn-sm btn-danger" onclick="return confirmSubmit()"
-                                   title="Your roles allowing revoke: <?php xecho($role->getDecoratorObject()); ?>" >
+                            <input id="revokeButton" type="submit" <?php xecho($role->getDecoratorObject()[0]); ?> value="Revoke" class="btn btn-sm btn-danger" onclick="return confirmSubmit()"
+                                   title="Your roles allowing revoke: <?php xecho($role->getDecoratorObject()[1]); ?>" >
                         </form>
+                    <?php endif;?>
+                </td>
+                <td class="site_table">
+                    <?php if(!$params['portalIsReadOnly'] && $role->getDecoratorObject() != null && $role->getDecoratorObject()[0] == 'disabled'):?>
+                        Remove or reassign API credentials from site before revoking this role.
                     <?php endif;?>
                 </td>
 

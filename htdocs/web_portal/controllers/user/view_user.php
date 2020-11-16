@@ -28,13 +28,18 @@ function view_user() {
         throw new Exception("An id must be specified");
     }
     $userId =  $_GET['id'];
-
     $user = \Factory::getUserService()->getUser($userId);
     if($user === null){
        throw new Exception("No user with that ID");
     }
     $params['user'] = $user;
 
+    $apiAuthEnts = $user->getAPIAuthenticationEntities();
+    $authEntSites = array();
+    /** @var \APIAuthentication $apiAuth */
+    foreach ($apiAuthEnts as $apiAuth) {
+        $authEntSites[$apiAuth->getParentSite()->getId()]++;
+    }
 
     // 2D array, each element stores role and a child array holding project Ids
     $role_ProjIds = array();
@@ -44,18 +49,35 @@ function view_user() {
 
     $callingUser = \Factory::getUserService()->getUserByPrinciple(Get_User_Principle());
 
+    $roleSiteCounts = array(); // Holds the number of roles held per site authentication entity
+
     // can the calling user revoke the targetUser's roles?
     /** @var \Role $r */
 
     foreach ($roles as $r) {
 
         $decoratorString = '';
+
+        // if this role is at a site where the user owns an authentication credential
+        // then we disable the revoke button to allow reassignment of the credential
+        /** @var \OwnedEntity $roleOwnedEntity */
+        $roleOwnedEntity = $r->getOwnedEntity();
+
+        if ($roleOwnedEntity->getType() == OwnedEntity::TYPE_SITE) {
+            /** @var \Site $roleOwnedEntity */
+            $siteId = $roleOwnedEntity->getId();
+            if (array_key_exists($siteId, $authEntSites)) {
+                $roleSiteCounts[$siteId]++;
+            }
+        }
+
+        $authorisingRoles = \Factory::getRoleActionAuthorisationService()
+            ->authoriseAction(\Action::REVOKE_ROLE, $roleOwnedEntity, $callingUser)
+            ->getGrantingRoles();
+
+
         // determine if callingUser can REVOKE this role instance
         if ($user != $callingUser) {
-
-            $authorisingRoles = \Factory::getRoleActionAuthorisationService()
-                ->authoriseAction(\Action::REVOKE_ROLE, $r->getOwnedEntity(), $callingUser)
-                ->getGrantingRoles();
 
             if ($callingUser->isAdmin()) {
                 $decoratorString .= 'GOCDB_ADMIN';
@@ -76,7 +98,7 @@ function view_user() {
             $decoratorString = '[Self revoke own role]';
         }
         if (strlen($decoratorString) > 0) {
-            $r->setDecoratorObject($decoratorString);
+            $r->setDecoratorObject(array("",$decoratorString));
         }
 
         // Get the names of the parent project(s) for this role so we can
@@ -92,11 +114,23 @@ function view_user() {
         $role_ProjIds[] = array($r, $projIds);
     }// end iterating roles
 
+    // Pass over the role list disabling revoke button where the user owns
+    // a API credential(s) and only a single site role
+
+    foreach ($role_ProjIds as &$pid) {
+        $site = $pid[0]->getOwnedEntity()->getId();
+        if ($roleSiteCounts[$site] == 1) {
+            $decorator = $pid[0]->getDecoratorObject();
+            $decorator[0] = "disabled";
+            $pid[0]->setDecoratorObject($decorator);
+        }
+    }
+
     // Get a list of the projects and their Ids for grouping roles by proj in view
     $projectNamesIds = array();
     $projects = \Factory::getProjectService()->getProjects();
     foreach($projects as $proj){
-    $projectNamesIds[$proj->getId()] = $proj->getName();
+        $projectNamesIds[$proj->getId()] = $proj->getName();
     }
 
     // Check to see if the current calling user has permission to edit the target user
