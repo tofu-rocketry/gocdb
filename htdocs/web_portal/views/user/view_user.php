@@ -193,18 +193,30 @@
                     <?php } ?>
                 </td>
                 <td class="site_table">
-                    <?php if(!$params['portalIsReadOnly'] && $role->getDecoratorObject() != null):?>
-                        <form action="index.php?Page_Type=Revoke_Role" method="post">
-                            <input type="hidden" name="id" value="<?php echo $role->getId()?>" />
-                            <input id="revokeButton" type="submit" <?php xecho($role->getDecoratorObject()[0]); ?> value="Revoke" class="btn btn-sm btn-danger" onclick="return confirmSubmit()"
-                                   title="Your roles allowing revoke: <?php xecho($role->getDecoratorObject()[1]); ?>" >
-                        </form>
-                    <?php endif;?>
+                    <?php
+                        if(!$params['portalIsReadOnly'] && $role->getDecoratorObject() != null) {
+                            echo '<form action="index.php?Page_Type=Revoke_Role" method="post">';
+                                echo '<input type="hidden" name="id" value="';
+                                        xecho($role->getId());
+                                        echo '"/>';
+                                echo '<input id="revokeButton" type="submit" ';
+                                        xecho($role->getDecoratorObject()["revokeButton"]);
+                                        echo ' value="Revoke" class="btn btn-sm btn-danger" onclick="return confirmSubmit()" ';
+                                        echo ' title="Your roles allowing revoke: ';
+                                        xecho($role->getDecoratorObject()["revokeMessage"]);
+                                        echo '"/>';
+                            echo '</form>';
+                        };
+                    ?>
                 </td>
                 <td class="site_table">
-                    <?php if(!$params['portalIsReadOnly'] && $role->getDecoratorObject() != null && $role->getDecoratorObject()[0] == 'disabled'):?>
-                        Remove or reassign API credentials from site before revoking this role.
-                    <?php endif;?>
+                    <?php
+                        $decorator = $role->getDecoratorObject();
+                        if(!$params['portalIsReadOnly'] &&
+                            is_array($decorator) && $decorator["revokeButton"] == 'disabled') {
+                                echo 'Remove or reassign API credentials from site before revoking this role.';
+                        }
+                    ?>
                 </td>
 
             </tr>

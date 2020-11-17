@@ -98,7 +98,7 @@ function view_user() {
             $decoratorString = '[Self revoke own role]';
         }
         if (strlen($decoratorString) > 0) {
-            $r->setDecoratorObject(array("",$decoratorString));
+            $r->setDecoratorObject(array("revokeButton" => "", "revokeMessage" => $decoratorString));
         }
 
         // Get the names of the parent project(s) for this role so we can
@@ -121,7 +121,7 @@ function view_user() {
         $site = $pid[0]->getOwnedEntity()->getId();
         if ($roleSiteCounts[$site] == 1) {
             $decorator = $pid[0]->getDecoratorObject();
-            $decorator[0] = "disabled";
+            $decorator["revokeButton"] = "disabled";
             $pid[0]->setDecoratorObject($decorator);
         }
     }
