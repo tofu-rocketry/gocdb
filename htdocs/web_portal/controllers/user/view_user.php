@@ -45,9 +45,8 @@ function view_user() {
     $role_ProjIds = array();
 
     // get the targetUser's roles
-    $roles = \Factory::getRoleService()->getUserRoles($user, \RoleStatus::GRANTED); //$user->getRoles();
-
-    $callingUser = \Factory::getUserService()->getUserByPrinciple(Get_User_Principle());
+    $roleService = \Factory::getRoleService();
+    $roles = $roleService->getUserRoles($user, \RoleStatus::GRANTED); //$user->getRoles();
 
     $roleSiteCounts = array(); // Holds the number of roles held per site authentication entity
 
@@ -57,28 +56,27 @@ function view_user() {
     foreach ($roles as $r) {
 
         $decoratorString = '';
+        $disableButton = '';
 
-        // if this role is at a site where the user owns an authentication credential
-        // then we disable the revoke button to allow reassignment of the credential
         /** @var \OwnedEntity $roleOwnedEntity */
         $roleOwnedEntity = $r->getOwnedEntity();
 
-        if ($roleOwnedEntity->getType() == OwnedEntity::TYPE_SITE) {
-            /** @var \Site $roleOwnedEntity */
-            $siteId = $roleOwnedEntity->getId();
-            if (array_key_exists($siteId, $authEntSites)) {
-                $roleSiteCounts[$siteId]++;
-            }
+        try {
+            // only meaningful for Site entities, but there is an
+            // internal check in the function.
+            $roleService->checkOrphanAPIAuth($r);
+        } catch (Exception $e) {
+            $disableButton = 'disabled';
         }
 
         $authorisingRoles = \Factory::getRoleActionAuthorisationService()
             ->authoriseAction(\Action::REVOKE_ROLE, $roleOwnedEntity, $callingUser)
             ->getGrantingRoles();
 
+        $callingUser = \Factory::getUserService()->getUserByPrinciple(Get_User_Principle());
 
-        // determine if callingUser can REVOKE this role instance
         if ($user != $callingUser) {
-
+            // determine if callingUser can REVOKE this role instance
             if ($callingUser->isAdmin()) {
                 $decoratorString .= 'GOCDB_ADMIN';
                 if (count($authorisingRoles) >= 1) {
@@ -97,8 +95,9 @@ function view_user() {
             // current user is viewing their own roles, so they can revoke their own roles
             $decoratorString = '[Self revoke own role]';
         }
-        if (strlen($decoratorString) > 0) {
-            $r->setDecoratorObject(array("revokeButton" => "", "revokeMessage" => $decoratorString));
+
+        if (strlen($decoratorString) > 0 || $disableButton == 'disabled') {
+            $r->setDecoratorObject(array("revokeButton" => $disableButton, "revokeMessage" => $decoratorString));
         }
 
         // Get the names of the parent project(s) for this role so we can
