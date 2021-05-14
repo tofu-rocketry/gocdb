@@ -106,7 +106,7 @@
     </div>
 
 <!-- Only show this box if the logged in user is looking at their own page -->
-<?php if( $user->getId() == $params['user']->getId() ) { ?>
+<?php if ($params['viewingSelf']) { ?>
     <div class="listContainer">
       <span class="header" style="vertical-align:middle; float: left; padding-top: 0.9em; padding-left: 1em;">
         User Authentication Details

@@ -79,9 +79,11 @@ function view_user() {
                     $r->setDecoratorObject('GOCDB ADMIN');
                 }
             }
+            $params['viewingSelf'] = false;
     } else {
         // current user is viewing their own roles, so they can revoke their own roles
         $r->setDecoratorObject('[Self revoke own role]');
+        $params['viewingSelf'] = true;
     }
 
     // Get the names of the parent project(s) for this role so we can
